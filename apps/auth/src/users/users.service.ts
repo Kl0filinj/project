@@ -1,7 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersRepository } from './users.repository';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
+import { getUserDto } from './dto/get-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -19,6 +20,15 @@ export class UsersService {
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
+      throw new UnauthorizedException('credentials are wrong');
+    }
+    return user;
+  }
+
+  async getUser(getUserDto: getUserDto) {
+    const user = await this.usersRepository.findOne({ _id: getUserDto.userId });
+
+    if (!user) {
       throw new UnauthorizedException('credentials are wrong');
     }
     return user;
